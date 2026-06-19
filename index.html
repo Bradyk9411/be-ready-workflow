@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Be_Ready_AI 대시보드 — 4가지 기능 워크플로우</title>
+<style>
+  :root{
+    --bg:#ffffff; --text:#37352f; --gray:#787774; --line:#e9e9e7;
+    --soft:#f7f6f3; --blue:#2383e2; --blue-bg:#e7f3f8; --blue-tx:#2562a3;
+    --green:#448361; --green-bg:#edf3ec; --red:#d44c47; --red-bg:#fbecec;
+    --yellow:#cb912f; --yellow-bg:#fbf3db; --purple:#9065b0; --purple-bg:#f4f0f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:ui-sans-serif,-apple-system,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.6}
+  .wrap{max-width:920px;margin:0 auto;padding:56px 24px 80px}
+
+  /* ---------- hero ---------- */
+  .pageicon{font-size:46px;line-height:1;margin-bottom:12px}
+  h1{font-size:38px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px;line-height:1.2}
+  .sub{color:var(--gray);font-size:16px;max-width:620px}
+  .lede{margin-top:22px;background:var(--soft);border-radius:8px;padding:18px 20px;font-size:15.5px}
+  .lede b{font-weight:600}
+  .lede .big{font-size:17px;font-weight:600;display:block;margin-bottom:6px}
+  .hr{height:1px;background:var(--line);border:0;margin:34px 0}
+
+  /* ---------- sticky nav ---------- */
+  .nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);margin:0 -24px 0;padding:11px 24px;display:flex;gap:8px;flex-wrap:wrap}
+  .nav a{font-size:13px;font-weight:500;color:var(--gray);text-decoration:none;padding:5px 11px;border-radius:6px;
+    border:1px solid transparent;transition:.14s;white-space:nowrap}
+  .nav a:hover{background:var(--soft);color:var(--text)}
+  .nav a.on{background:var(--text);color:#fff}
+
+  /* ---------- feature block ---------- */
+  .feat{padding-top:44px;scroll-margin-top:58px}
+  .feat-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:4px}
+  .feat-num{flex:none;width:42px;height:42px;border-radius:10px;display:grid;place-items:center;
+    font-size:22px;color:#fff}
+  .feat-title{font-size:25px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+  .feat-tag{font-size:12.5px;color:var(--gray);font-weight:500;margin-top:3px;font-family:ui-monospace,Menlo,Consolas,monospace}
+
+  /* QA blocks */
+  .qa{margin-top:20px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .qa-row{display:grid;grid-template-columns:148px 1fr;gap:0}
+  .qa-row+.qa-row{border-top:1px solid var(--line)}
+  .qa-k{background:var(--soft);padding:16px 16px;font-size:13.5px;font-weight:600;display:flex;align-items:flex-start;gap:7px}
+  .qa-k .e{font-size:15px;line-height:1.3}
+  .qa-v{padding:16px 18px;font-size:14.5px}
+  .qa-v p+p{margin-top:8px}
+  .qa-v .muted{color:var(--gray)}
+  .qa-v strong{font-weight:600}
+  .pain{color:var(--red);font-weight:600}
+  .gain{color:var(--green);font-weight:600}
+
+  /* tool chips */
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{font-size:12.5px;font-weight:500;padding:4px 10px;border-radius:20px;background:var(--soft);
+    border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px}
+  .chip .d{width:7px;height:7px;border-radius:50%;flex:none}
+
+  /* ---------- workflow stepper ---------- */
+  .flow-label{font-size:13px;font-weight:600;color:var(--gray);margin:18px 0 12px;
+    display:flex;align-items:center;gap:7px}
+  .flow{position:relative;display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:14px;position:relative;padding-bottom:18px}
+  .step:last-child{padding-bottom:0}
+  .step .rail{flex:none;display:flex;flex-direction:column;align-items:center}
+  .step .node{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;
+    font-weight:700;color:#fff;flex:none;z-index:2;box-shadow:0 0 0 4px #fff}
+  .step .line{width:2px;flex:1;background:var(--line);margin-top:2px;position:relative;overflow:hidden}
+  .step:last-child .line{display:none}
+  .step .line::after{content:"";position:absolute;left:0;top:-40%;width:100%;height:40%;
+    background:linear-gradient(to bottom,transparent,currentColor,transparent);
+    animation:drip 2.2s linear infinite}
+  .step .body{padding-top:3px;padding-bottom:4px}
+  .step .st{font-size:14.5px;font-weight:600}
+  .step .sd{font-size:13.5px;color:var(--gray);margin-top:2px}
+  .step .sd code{background:var(--soft);padding:1px 6px;border-radius:4px;font-size:12px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--text)}
+  @keyframes drip{0%{top:-40%}100%{top:100%}}
+
+  .note{margin-top:16px;display:flex;gap:9px;align-items:flex-start;background:var(--blue-bg);
+    border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--blue-tx)}
+  .note.g{background:var(--green-bg);color:#2f5c44}
+  .note.y{background:var(--yellow-bg);color:#8a6516}
+  .note.p{background:var(--purple-bg);color:#6b4685}
+  .note .i{font-size:15px;flex:none}
+  .note code{background:rgba(255,255,255,.6);padding:1px 6px;border-radius:4px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* closing */
+  .close-h{font-size:21px;font-weight:700;margin:0 0 6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .pcard{border:1px solid var(--line);border-radius:9px;padding:15px 16px}
+  .pcard .pt{font-weight:600;font-size:14.5px;display:flex;gap:8px;align-items:center;margin-bottom:5px}
+  .pcard .pd{font-size:13.5px;color:var(--gray)}
+  .foot{color:var(--gray);font-size:13px;margin-top:46px;text-align:center}
+
+  @media(max-width:680px){
+    .wrap{padding:34px 16px 60px}
+    h1{font-size:29px}
+    .qa-row{grid-template-columns:1fr}
+    .qa-k{border-bottom:1px solid var(--line)}
+    .grid2{grid-template-columns:1fr}
+    .nav{margin:0 -16px 0;padding:10px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <div class="pageicon">⚙️</div>
+  <h1>Be_Ready_AI 대시보드</h1>
+  <div class="sub">정기모임 참석자를 위한 <b>지속적인 바이브코딩 실행과 인사이트 공유 시스템</b>.</div>
+
+  <hr class="hr">
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav" id="nav">
+    <a href="#f1" data-t="f1">① 실시간 동기화</a>
+    <a href="#f2" data-t="f2">② 출석·참석률</a>
+    <a href="#f3" data-t="f3">③ 단계 자동 보정</a>
+    <a href="#f4" data-t="f4">④ CS센터·알림</a>
+    <a href="#close" data-t="close">🔒 프라이버시</a>
+  </nav>
+
+  <!-- ============ FEATURE 1 ============ -->
+  <section class="feat reveal" id="f1">
+    <div class="feat-head">
+      <div class="feat-num" style="background:var(--blue)">📡</div>
+      <div>
+        <div class="feat-title">① 실시간 프로젝트 업데이트 동기화</div>
+        <div class="feat-tag">Edge Function · sync-update</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🎯</span>문제정의</div>
+        <div class="qa-v">
+          <p><span class="gain">에이전트가 직접 데이터를 입력하는 워크플로우를 경험</span>하고, <strong>노션 데이터 수동 업데이트에서 탈피.</strong></p>
+        </div>
+      </div>
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🛠</span>사용 툴</div>
+        <div class="qa-v">
+          <div class="chips">
+            <span class="chip"><span class="d" style="background:#9065b0"></span>참여자 AI 에이전트 <code style="font-size:11px">be_ready_ai.md · /be-ready</code></span>
+            <span class="chip"><span class="d" style="background:#448361"></span>Supabase <code style="font-size:11px">weekly_updates (append-only · RLS)</code></span>
+            <span class="chip"><span class="d" style="background:var(--yellow)"></span>DB 웹훅 <code style="font-size:11px">pg_net</code></span>
+            <span class="chip"><span class="d" style="background:var(--blue)"></span>Edge Function <code style="font-size:11px">sync-update</code></span>
+            <span class="chip"><span class="d" style="background:#37352f"></span>Notion API</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-label">🔄 워크플로우 — 약 4초</div>
+    <div class="flow" style="color:var(--blue)">
+      <div class="step"><div class="rail"><div class="node" style="background:var(--blue)">1</div><div class="line"></div></div>
+        <div class="body"><div class="st">참여자: "대시보드 업데이트" (또는 <code>/be-ready</code>)</div>
+        <div class="sd">각자의 AI가 호출됨 — 사람이 노션을 열 필요 없음</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--blue)">2</div><div class="line"></div></div>
+        <div class="body"><div class="st">내 AI가 PRD·진행을 읽고 정리</div>
+        <div class="sd">진행 단계 · 이번 주 한 줄 · 할 일 목록을 <code>{key, name, status}</code>로 도출</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--blue)">3</div><div class="line"></div></div>
+        <div class="body"><div class="st">올리기 전 확인 — "이렇게 올릴게요, 맞나요?"</div>
+        <div class="sd">내가 "응" 하면 전송, "아니"면 고쳐서 다시 확인</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--blue)">4</div><div class="line"></div></div>
+        <div class="body"><div class="st">Supabase로 전송 → DB 웹훅이 Edge Function 깨움</div>
+        <div class="sd">쓰기 전용 키로 <code>weekly_updates</code>에 INSERT → 트리거가 <code>sync-update</code> 호출</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">5</div><div class="line"></div></div>
+        <div class="body"><div class="st">sync-update가 노션에 기록</div>
+        <div class="sd">① 닉네임 ↔ 멤버 명단 매칭 → ② 프로젝트 단계 갱신 → ③ 활동 로그 새로 쌓기 → ④ 할 일 4칸 정리(앞으로·진행중·대기·완료) → ⑤ "이번 주 현황" 숫자 재계산</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">✓</div></div>
+        <div class="body"><div class="st">4초 뒤 대시보드에 자동 반영 ✅</div>
+        <div class="sd">피드 · 도움 필요 · 갤러리 · 펄스가 동시에 갱신</div></div></div>
+    </div>
+
+    <div class="note p"><span class="i">⌨️</span><div><b>커스텀 커맨드 <code>/be-ready</code></b> — 참여자가 본인 AI에 <code>be_ready_ai.md</code>를 한 번 붙여넣으면 만들어지는 슬래시 커맨드예요. 실행하면 그 AI가 <b>PRD·진행을 읽고 → 올릴 내용을 도출 → 확인받고 → Supabase로 전송</b>하는 전 과정을 대신합니다. 매번 양식을 외울 필요 없이 "대시보드 업데이트" 한 마디면 끝.</div></div>
+    <div class="note g"><span class="i">🛡️</span><div><b>유령 데이터 방지</b> — 닉네임이 멤버 명단에 없으면 노션에 <b>아무것도 안 만들고 보류</b>합니다. 아무나 남의 이름으로 글을 흘려넣을 수 없어요.</div></div>
+    <div class="note"><span class="i">🔑</span><div><b>중복 없는 할 일</b> — 작업마다 고정 <code>key</code>로 식별(dedup). 문구를 다듬어도 같은 Task가 <b>갱신</b>될 뿐, 새로 생기지 않습니다.</div></div>
+  </section>
+
+  <!-- ============ FEATURE 2 ============ -->
+  <section class="feat reveal" id="f2">
+    <div class="feat-head">
+      <div class="feat-num" style="background:var(--green)">🗓️</div>
+      <div>
+        <div class="feat-title">② 정기모임 출석·참석률 자동 집계</div>
+        <div class="feat-tag">Edge Function · recompute-attendance · cron 15분</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🎯</span>문제정의</div>
+        <div class="qa-v">
+          <p><span class="gain">참석자 현황 및 CRM 시스템 구축</span>을 통해 <strong>대시보드 현황판 자동화.</strong></p>
+          <p class="muted">제약: 멤버 CRM(본명·연락처 등)은 <b>비공개</b>여야 한다. 공개 콜아웃에는 닉네임·숫자만.</p>
+        </div>
+      </div>
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🛠</span>사용 툴</div>
+        <div class="qa-v">
+          <div class="chips">
+            <span class="chip"><span class="d" style="background:#37352f"></span>Notion 정기모임(회차) DB</span>
+            <span class="chip"><span class="d" style="background:var(--red)"></span>멤버 CRM <code style="font-size:11px">relation · 비공개</code></span>
+            <span class="chip"><span class="d" style="background:var(--purple)"></span>Notion 롤업 <code style="font-size:11px">Count all</code></span>
+            <span class="chip"><span class="d" style="background:var(--green)"></span>Edge Function <code style="font-size:11px">recompute-attendance</code></span>
+            <span class="chip"><span class="d" style="background:var(--yellow)"></span>pg_cron <code style="font-size:11px">15분 주기</code></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-label">🔄 워크플로우 — 15분마다 자동</div>
+    <div class="flow" style="color:var(--green)">
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">1</div><div class="line"></div></div>
+        <div class="body"><div class="st">운영자: 회차 DB에 참석/노쇼 체크</div>
+        <div class="sd">참석자·노쇼를 멤버 CRM과 관계(relation)로 연결</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">2</div><div class="line"></div></div>
+        <div class="body"><div class="st">15분마다 recompute-attendance 자동 실행</div>
+        <div class="sd">pg_cron이 사람 없이 주기적으로 깨움</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">3</div><div class="line"></div></div>
+        <div class="body"><div class="st">멤버별 가입후 모임 수 · 참석률(%) 갱신</div>
+        <div class="sd">집계 anchor의 전체 모임 수를 기준(분모)으로 자동 계산</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">✓</div></div>
+        <div class="body"><div class="st">"다음 정기모임" 콜아웃 갱신</div>
+        <div class="sd">참석 확정 인원 · 참석률 · D-day를 <b>CRM 미노출</b>로 안전하게 공개</div></div></div>
+    </div>
+
+    <div class="note y"><span class="i">🐞</span><div><b>실제로 잡은 버그</b> — 참석 인원을 관계 "개수"로 세다 오집계가 났는데, 노션 롤업 <code>Count all</code>로 바꿔 해결했어요. (자동화는 분모·집계 방식이 핵심)</div></div>
+  </section>
+
+  <!-- ============ FEATURE 3 ============ -->
+  <section class="feat reveal" id="f3">
+    <div class="feat-head">
+      <div class="feat-num" style="background:var(--yellow)">🩹</div>
+      <div>
+        <div class="feat-title">③ 프로젝트 단계 자동 보정</div>
+        <div class="feat-tag">Edge Function · reconcile-stages · cron 하루 1회 (09:30 KST)</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🎯</span>문제정의</div>
+        <div class="qa-v">
+          <p><span class="gain">프로젝트 진행 상황에 따른 자동화 시스템 구축.</span></p>
+          <p class="muted">원칙: 멱등(변한 것만 PATCH), 사람의 명시적 선택은 존중(배포·완성, 활성 기획중은 건드리지 않음).</p>
+        </div>
+      </div>
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🛠</span>사용 툴</div>
+        <div class="qa-v">
+          <div class="chips">
+            <span class="chip"><span class="d" style="background:#37352f"></span>Notion Project · Note DB</span>
+            <span class="chip"><span class="d" style="background:var(--yellow)"></span>Edge Function <code style="font-size:11px">reconcile-stages</code></span>
+            <span class="chip"><span class="d" style="background:var(--yellow)"></span>pg_cron <code style="font-size:11px">하루 1회</code></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-label">🔄 워크플로우 — 하루 1회</div>
+    <div class="flow" style="color:var(--yellow)">
+      <div class="step"><div class="rail"><div class="node" style="background:var(--yellow)">1</div><div class="line"></div></div>
+        <div class="body"><div class="st">매일 09:30 reconcile-stages 자동 실행</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--yellow)">2</div><div class="line"></div></div>
+        <div class="body"><div class="st">프로젝트별 최신 노트 신호 읽기</div>
+        <div class="sd">도움 필요 여부 · 막힌 점 · 마지막 업데이트 날짜를 확인</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--yellow)">3</div><div class="line"></div></div>
+        <div class="body"><div class="st">규칙대로 단계 보정 판단</div>
+        <div class="sd">도움필요 → <b>막힘</b> · 해결 → <b>개발중</b> · 14일 무업데이트 → <b>중단</b> · 중단 후 새 노트 → <b>재활성</b></div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">✓</div></div>
+        <div class="body"><div class="st">변한 것만 PATCH (멱등)</div>
+        <div class="sd">바뀐 프로젝트만 갱신 — 그대로면 아무 일도 안 일어남</div></div></div>
+    </div>
+
+    <div class="note y"><span class="i">⚖️</span><div><b>자동화가 넘지 않는 선</b> — 멤버가 직접 올린 <code>배포·완성</code>이나 활성 <code>기획중</code>은 자동 보정이 절대 덮어쓰지 않습니다. 자동은 어디까지나 '방치된 어긋남'만 정리.</div></div>
+  </section>
+
+  <!-- ============ FEATURE 4 ============ -->
+  <section class="feat reveal" id="f4">
+    <div class="feat-head">
+      <div class="feat-num" style="background:var(--red)">🛟</div>
+      <div>
+        <div class="feat-title">④ CS센터 + 카카오 알림</div>
+        <div class="feat-tag">공개 폼 → CS 접수 DB · /cs 접수 처리 · Edge Function cs-notify · cron 매일 09시</div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🎯</span>문제정의</div>
+        <div class="qa-v">
+          <p><span class="gain">노션에 접속하지 않아도 실시간 CS 문의 확인 자동화.</span></p>
+          <p class="muted">제약: 개인 민원이 섞이므로 접수함은 <b>비공개</b>로 보호.</p>
+        </div>
+      </div>
+      <div class="qa-row">
+        <div class="qa-k"><span class="e">🛠</span>사용 툴</div>
+        <div class="qa-v">
+          <div class="chips">
+            <span class="chip"><span class="d" style="background:var(--blue)"></span>Notion 공개 폼 <code style="font-size:11px">비로그인</code></span>
+            <span class="chip"><span class="d" style="background:#37352f"></span>CS 접수 DB <code style="font-size:11px">비공개</code></span>
+            <span class="chip"><span class="d" style="background:var(--purple)"></span>운영자 <code style="font-size:11px">/cs 접수 처리</code></span>
+            <span class="chip"><span class="d" style="background:var(--red)"></span>Edge Function <code style="font-size:11px">cs-notify</code></span>
+            <span class="chip"><span class="d" style="background:var(--yellow)"></span>카카오 API <code style="font-size:11px">토큰 자동 갱신</code></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-label">🔄 워크플로우</div>
+    <div class="flow" style="color:var(--red)">
+      <div class="step"><div class="rail"><div class="node" style="background:var(--red)">1</div><div class="line"></div></div>
+        <div class="body"><div class="st">참여자: 공개 폼 제출 (로그인 불필요)</div>
+        <div class="sd">제목 · 유형(건의/오류) · 내용 · 닉네임 · 첨부</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--red)">2</div><div class="line"></div></div>
+        <div class="body"><div class="st">CS 접수 DB에 행 생성 (직결)</div>
+        <div class="sd">폼이 곧 데이터 — 사이에 사람이 옮기는 단계 없음</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--red)">3</div><div class="line"></div></div>
+        <div class="body"><div class="st">매일 09시 cs-notify 자동 실행</div>
+        <div class="sd">새 접수가 있으면 운영자 카톡으로 다이제스트 전송 + 카카오 토큰 자동 갱신</div></div></div>
+      <div class="step"><div class="rail"><div class="node" style="background:var(--green)">✓</div></div>
+        <div class="body"><div class="st">운영자: <code>/cs</code> 접수 처리</div>
+        <div class="sd">상태 · 우선순위 · 처리 메모를 같은 DB 안에서 정리하고 마감</div></div></div>
+    </div>
+  </section>
+
+  <hr class="hr" style="margin-top:48px">
+
+  <!-- ============ CLOSING / PRIVACY ============ -->
+  <section class="feat reveal" id="close" style="padding-top:8px">
+    <div class="close-h">🔒 한결같이 지킨 원칙 — 프라이버시 · 안전</div>
+    <div class="sub" style="font-size:14.5px">자동화는 편하지만, 공개 대시보드라 "안전하게 열려있는지"가 더 중요했어요.</div>
+    <div class="grid2">
+      <div class="pcard"><div class="pt">🙈 개인정보는 비공개</div><div class="pd">멤버 CRM(본명·연락처)은 관계로만 연결하고, 공개 뷰엔 <b>닉네임만</b> 노출. 공개 뷰는 <code>공개=true</code> 강제.</div></div>
+      <div class="pcard"><div class="pt">✍️ 쓰기 전용 키</div><div class="pd">외부에 나가는 건 <b>append(쓰기) 전용</b> 키뿐. 남의 글을 읽거나 고칠 수 없어요. service_role 키는 어디에도 배포 안 함.</div></div>
+      <div class="pcard"><div class="pt">👻 유령 데이터 차단</div><div class="pd">멤버 명단에 없는 닉네임으로 들어온 업데이트는 노션에 <b>아무것도 만들지 않고 보류</b>.</div></div>
+      <div class="pcard"><div class="pt">🗝️ 토큰은 금고에</div><div class="pd">Notion 토큰은 코드가 아니라 Supabase Vault에 보관, 서버 함수만 꺼내 씁니다.</div></div>
+    </div>
+
+    <div class="note" style="margin-top:22px"><span class="i">🧩</span><div><b>전체 구성</b> — Edge Function 4개(<code>sync-update</code> · <code>recompute-attendance</code> · <code>reconcile-stages</code> · <code>cs-notify</code>) + Notion DB 7개(Project · Note · Task · 멤버 CRM · 정기모임 · 집계 anchor · CS 접수) + 참여자 셀프 온보딩 도구(<code>be_ready_ai.md</code> · <code>/be-ready</code>).</div></div>
+  </section>
+
+  <div class="foot">Made by Brady · Be_Ready_AI 바이브코딩 스터디 · 매주 토 10시 © 2026</div>
+</div>
+
+<script>
+  // scroll reveal
+  const io = new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // nav active state
+  const links = [...document.querySelectorAll('.nav a')];
+  const map = {};
+  links.forEach(a=> map[a.dataset.t]=a);
+  const secIO = new IntersectionObserver((es)=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){
+        links.forEach(l=>l.classList.remove('on'));
+        if(map[e.target.id]) map[e.target.id].classList.add('on');
+      }
+    });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  ['f1','f2','f3','f4','close'].forEach(id=>{ const el=document.getElementById(id); if(el) secIO.observe(el); });
+</script>
+</body>
+</html>
